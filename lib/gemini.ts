@@ -1,15 +1,18 @@
-// ประกอบ prompt + เรียก Gemini 3.5 Flash ตอบคำถามลูกค้าโดยอิง FAQ เท่านั้น
+// ประกอบ prompt + เรียก Gemini Flash ตอบคำถามลูกค้าโดยอิง FAQ เท่านั้น
 //
-// ปรับตาม Google docs ล่าสุดของ Gemini 3.x:
-//  1) ไม่ใส่ temperature / top_p / top_k — Gemini 3.x จูนมาให้ทำงานดีที่สุดกับ default แล้ว
-//  2) ใช้ thinkingLevel: "minimal" (default ของ 3.x คือ "medium" ซึ่งคิดเยอะเกินงาน FAQ สั้น ๆ)
-//     ตั้ง minimal แล้ว maxOutputTokens: 1024 เหลือเฟือ และตอบเร็วทันลิมิต 10 วิของ LINE
+// หมายเหตุ (พิสูจน์ด้วยการยิง API จริงผ่าน @google/genai):
+//  - ใช้ gemini-2.5-flash (บรีฟเดิมระบุ gemini-3.5-flash แต่โมเดลนั้นไม่มีจริง → 404)
+//  - ไม่ใส่ temperature / top_p / top_k (ปล่อย default)
+//  - ปิด thinking ด้วย thinkingBudget: 0 เพื่อให้ตอบเร็วเหมาะงาน FAQ สั้น ๆ
+//    (บรีฟเดิมใช้ thinkingLevel: "minimal" แต่นั่นเป็นพารามิเตอร์ของ Gemini 3.x
+//     ซึ่ง 2.5 ไม่รองรับ → 400 "thinking_level is not supported by this model")
+//    ตั้ง maxOutputTokens: 1024 เหลือเฟือ และทันลิมิต 10 วิของ LINE
 
 import { GoogleGenAI } from "@google/genai";
 
 export const DEFAULT_REPLY = "เรื่องนี้เราขอเช็กให้คุณพี่ก่อนนะ 🙏";
 
-const MODEL = "gemini-3.5-flash";
+const MODEL = "gemini-2.5-flash";
 const MAX_OUTPUT_TOKENS = 1024;
 const TIMEOUT_MS = 8_000; // กันชน 10 วิของ LINE
 
@@ -67,9 +70,9 @@ export async function askGemini(faqCsv: string, userMessage: string): Promise<st
       contents: buildPrompt(faqCsv, userMessage),
       config: {
         maxOutputTokens: MAX_OUTPUT_TOKENS,
-        // thinkingLevel เป็นพารามิเตอร์ของ Gemini 3.x; cast เผื่อ type ของ SDK ยังตามไม่ทัน
-        thinkingConfig: { thinkingLevel: "minimal" } as Record<string, unknown>,
-      } as Record<string, unknown>,
+        // thinkingBudget: 0 = ปิด thinking (เร็วสุด เหมาะงาน FAQ สั้น ๆ)
+        thinkingConfig: { thinkingBudget: 0 },
+      },
     });
 
     // timeout ~8 วิ กันชน 10 วิของ LINE
