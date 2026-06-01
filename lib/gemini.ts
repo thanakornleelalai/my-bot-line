@@ -10,7 +10,7 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-export const DEFAULT_REPLY = "เรื่องนี้เราขอเช็กให้คุณพี่ก่อนนะ 🙏";
+export const DEFAULT_REPLY = "เราไม่รู้เหมือนกันจ้าคุณพี่";
 
 const MODEL = "gemini-2.5-flash-lite";
 const MAX_OUTPUT_TOKENS = 1024;
