@@ -14,7 +14,7 @@ import {
   rescheduleAppointment,
 } from "./calendar";
 
-const MODEL = "gemini-2.5-flash";
+const MODEL = "gemini-2.5-flash-lite";
 const MAX_OUTPUT_TOKENS = 1024;
 const MAX_TOOL_ROUNDS = 6; // กัน loop ไม่รู้จบ
 const TIMEZONE = process.env.TIMEZONE || "Asia/Bangkok";

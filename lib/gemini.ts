@@ -12,7 +12,7 @@ import { GoogleGenAI } from "@google/genai";
 
 export const DEFAULT_REPLY = "เรื่องนี้เราขอเช็กให้คุณพี่ก่อนนะ 🙏";
 
-const MODEL = "gemini-2.5-flash";
+const MODEL = "gemini-2.5-flash-lite";
 const MAX_OUTPUT_TOKENS = 1024;
 const TIMEOUT_MS = 8_000; // กันชน 10 วิของ LINE
 
