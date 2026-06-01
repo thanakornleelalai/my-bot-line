@@ -7,10 +7,14 @@
 import type { NextRequest } from "next/server";
 import { validateSignature, messagingApi, type WebhookEvent } from "@line/bot-sdk";
 import { getFaq } from "@/lib/sheet";
-import { askGemini, DEFAULT_REPLY } from "@/lib/gemini";
+import { DEFAULT_REPLY } from "@/lib/gemini";
+import { askAssistant } from "@/lib/assistant";
 
 // SDK ของ LINE ต้องรันบน Node ไม่ใช่ Edge
 export const runtime = "nodejs";
+
+// เผื่อเวลา: assistant อาจเรียกปฏิทินหลายรอบ (function calling) ตั้ง maxDuration กว้างขึ้น
+export const maxDuration = 30;
 
 let lineClient: messagingApi.MessagingApiClient | null = null;
 
@@ -60,13 +64,13 @@ async function handleEvent(event: WebhookEvent): Promise<void> {
 
     const userMessage = event.message.text;
 
-    // 5) ดึง FAQ → ถาม Gemini (ลงเอยที่ DEFAULT_REPLY เสมอถ้าพัง)
+    // 5) ดึง FAQ → ถาม assistant (FAQ + ปฏิทิน) — ลงเอยที่ DEFAULT_REPLY เสมอถ้าพัง
     let reply = DEFAULT_REPLY;
     try {
       const faqCsv = await getFaq();
-      reply = await askGemini(faqCsv, userMessage);
+      reply = await askAssistant(faqCsv, userMessage);
     } catch (err) {
-      console.error("[webhook] FAQ/Gemini error:", err);
+      console.error("[webhook] assistant error:", err);
       reply = DEFAULT_REPLY;
     }
 
